@@ -33,7 +33,7 @@
     <configVersion>2</configVersion>
     <userRemoteConfigs>
       <hudson.plugins.git.UserRemoteConfig>
-        <url>https://github.com/iahmad9/test.git</url>
+        <url>https://github.com/iahmad9/ec2watcher.git</url>
       </hudson.plugins.git.UserRemoteConfig>
     </userRemoteConfigs>
     <branches>
@@ -60,7 +60,7 @@ H 8 * * *</spec>
     <hudson.tasks.Shell>
       <command>set +x
 pip3 install -r requirements.txt
-python3 list-unused-machines.py --key-id ${AWS_KEY_ID} --key-secret ${AWS_KEY_SECRET} --region-name $AWS_REGION_NAME --period $PERIOD --duration $DURATION --threshold $THRESHOLD</command>
+python3 ec2_watcher.py --key-id ${AWS_KEY_ID} --key-secret ${AWS_KEY_SECRET} --region-name $AWS_REGION_NAME --period $PERIOD --duration $DURATION --threshold $THRESHOLD</command>
     </hudson.tasks.Shell>
   </builders>
   <publishers>
