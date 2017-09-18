@@ -11,7 +11,7 @@ percentage against the provided threshold.
 
 Example:
 
-        $ python list-unused-machines.py --key-id <aws_access_key_id>
+        $ python ec2_watcher.py --key-id <aws_access_key_id>
                                          --key-secret <aws_secret_access_key>
                                          --region-name us-east-1
                                          --period 1
