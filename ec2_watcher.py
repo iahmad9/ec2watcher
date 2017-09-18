@@ -113,7 +113,7 @@ class EC2CloudWatcher(object):
         """
         launch_time = instance.launch_time
         start_time = datetime.datetime.now(launch_time.tzinfo)-datetime.timedelta(seconds=self.duration)        
-        if launch_time < start_time:
+        if launch_time > start_time:
             return True
 
         response = self.get_average_cpu_utilization(instance.id)
@@ -201,17 +201,20 @@ def main():
         print ("Threshold value should be between 1 and 100")
         return 1
 
+    watcher = None
     try:
-        wathcer = EC2CloudWatcher(args.key_id,
+        watcher = EC2CloudWatcher(args.key_id,
                                   args.key_secret,
                                   args.region_name,
                                   args.period*3600,
                                   args.duration*3600,
                                   args.threshold)
-        machines = wathcer.get_unused_machines()
+
     except Exception as exception:
         print(exception)
+        return 1
 
+    machines = watcher.get_unused_machines()
     criteria = """region_name:{0},
                   sampling period:{1} hours,
                   duration:{2} hours,
