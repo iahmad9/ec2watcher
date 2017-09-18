@@ -7,7 +7,7 @@ This standlone python based tool can be used to list the number of unused/under 
 
 To run from command line
 
-    $ python list-unused-machines.py --key-id <aws_access_key_id>
+    $ python ec2_watcher.py --key-id <aws_access_key_id>
                                          --key-secret <aws_secret_access_key>
                                          --region-name us-east-1
                                          --period 1
@@ -18,7 +18,7 @@ This will generate basic html report.html with a table, listing the unused machi
 
 For more details about command line options, run
 
-    $ python list-unused-machines.py --help
+    $ python ec2_watcher.py --help
 
 **Dependencies**:
 * Python 2.7 +
