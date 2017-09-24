@@ -26,8 +26,14 @@ from __future__ import print_function
 import datetime
 import xml.etree.cElementTree as ET
 from argparse import ArgumentParser, RawTextHelpFormatter
+from flask import Flask
+from flask_restful import Resource, Api
 from boto3 import session
 from botocore.exceptions import ClientError
+
+app = Flask(__name__)
+api = Api(app)
+watcher = None
 
 class EC2CloudWatcher(object):
     """ Class to interact with cloudwatch and EC2 AWS services"""
@@ -136,6 +142,8 @@ class EC2CloudWatcher(object):
                 continue # This machine is in use, check the next one
             # Reached here, machine is unused as per given criteria, add it to the list
             machines.append(instance)
+            machines.append(instance)
+            machines.append(instance)
         return machines
 
 
@@ -169,7 +177,15 @@ def write_basic_html_report(machines, criteria):
     tree = ET.ElementTree(root)
     tree.write('report.html')
 
-   
+
+class UnusedMachines(Resource):
+    def get(self):
+        if watcher:
+            machines = watcher.get_unused_machines()
+            return {'total':len(machines), 'machines': [{'id': m.id } for m in machines]}
+
+api.add_resource(UnusedMachines, '/umachines') # Route_1
+
 def main():
     parser = ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
     parser.add_argument('--key-id', type=str, nargs='?',
@@ -186,23 +202,26 @@ def main():
                         in hours, default: 24 hours, max: 72 hours""", default=24)
     parser.add_argument('--threshold', type=int, nargs='?',
                         help='Average CPU uitilization to check, default is 1 %%, max: 100 %%', default=1)
+    parser.add_argument('--service',
+                        help="To run it as a restful service at port: 5151", action='store_true')
+
     args = parser.parse_args()
 
 
     if args.period < 1 or args.period > 24:
-        print ("Period value should be between 1 and 24 hours")
+        print("Period value should be between 1 and 24 hours")
         return 1
 
     if args.duration < 1 or args.duration > 72:
-        print ("Duration value should be between 1 and 72 hours")
+        print("Duration value should be between 1 and 72 hours")
         return 1
 
     if args.threshold < 1 or args.threshold > 100:
-        print ("Threshold value should be between 1 and 100")
+        print("Threshold value should be between 1 and 100")
         return 1
 
-    watcher = None
     try:
+        global watcher
         watcher = EC2CloudWatcher(args.key_id,
                                   args.key_secret,
                                   args.region_name,
@@ -214,16 +233,19 @@ def main():
         print(exception)
         return 1
 
-    machines = watcher.get_unused_machines()
-    criteria = """region_name:{0},
-                  sampling period:{1} hours,
-                  duration:{2} hours,
-                  cpu threshold: {3}""".format(
-                      args.region_name,
-                      args.period,
-                      args.duration,
-                      args.threshold)
-    write_basic_html_report(machines, criteria)
+    if args.service:
+        app.run(port='5151')
+    else:
+        machines = watcher.get_unused_machines()
+        criteria = """region_name:{0},
+                    sampling period:{1} hours,
+                    duration:{2} hours,
+                    cpu threshold: {3}""".format(
+                        args.region_name,
+                        args.period,
+                        args.duration,
+                        args.threshold)
+        write_basic_html_report(machines, criteria)
 
 if __name__ == '__main__':
     main()
