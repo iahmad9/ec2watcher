@@ -1,6 +1,6 @@
 # List Unused Machines on AWS EC2
 
-Note: In below text term instance and machine is used interchangebly
+Note: In below text, term instance and machine is used interchangebly
 
 ### How to Use:
 This standlone python based tool can be used to list the number of unused/under utilized instances on AWS EC2 cloud for the given account. script can be run from command line or could be integrated with jenkins by importing the jenkins-job.xml
